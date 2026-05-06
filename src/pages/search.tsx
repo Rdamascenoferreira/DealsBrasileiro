@@ -1,23 +1,29 @@
 import React, { useState } from 'react'
+import SearchBar from '../components/SearchBar'
+import GameCard from '../components/GameCard'
 
 export default function SearchPage() {
-  const [q, setQ] = useState('')
-  const [results, setResults] = useState<any>(null)
+  const [results, setResults] = useState<any[]>([])
 
-  async function doSearch() {
+  async function doSearch(q?: string) {
+    if (!q) return
     const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
     const data = await res.json()
-    setResults(data)
+    const items = (data.data?.list || []).map((i: any) => ({ title: i.title || i.name, slug: i.id || i.url }))
+    setResults(items)
   }
 
   return (
-    <div style={{ padding: 24, background: '#0b1020', minHeight: '100vh', color: '#e6eef8' }}>
-      <h1>Buscar jogos</h1>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome do jogo" />
-        <button onClick={doSearch}>Buscar</button>
-      </div>
-      <pre style={{ marginTop: 16 }}>{JSON.stringify(results, null, 2)}</pre>
+    <div className="min-h-screen p-8">
+      <main className="max-w-4xl mx-auto">
+        <SearchBar onSearch={doSearch} />
+
+        <section className="mt-8 grid grid-cols-1 gap-4">
+          {results.map((g) => (
+            <GameCard key={g.slug} game={g} />
+          ))}
+        </section>
+      </main>
     </div>
   )
 }
