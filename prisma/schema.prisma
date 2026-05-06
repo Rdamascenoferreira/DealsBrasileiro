@@ -48,6 +48,7 @@ model Store {
   supportsAffiliate Boolean @default(false)
   createdAt        DateTime @default(now())
   offers           Offer[]
+  history          PriceHistory[]
 }
 
 enum StoreType {
@@ -84,6 +85,8 @@ model PriceHistory {
   id               String   @id @default(cuid())
   game             Game     @relation(fields: [gameId], references: [id])
   gameId           String
+  offer            Offer?   @relation(fields: [offerId], references: [id])
+  offerId          String?
   store            Store    @relation(fields: [storeId], references: [id])
   storeId          String
   price            Float
