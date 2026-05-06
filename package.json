@@ -8,7 +8,9 @@
     "start": "next start",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "worker": "node -r ts-node/register src/workers/offerUpdater.ts",
+    "worker:dev": "ts-node-dev --respawn --transpile-only src/workers/offerUpdater.ts"
   },
   "dependencies": {
     "next": "13.4.14",
@@ -23,17 +25,15 @@
     "chart.js": "^4.4.0",
     "tailwindcss": "^3.4.10",
     "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.29"
+    "postcss": "^8.4.29",
+    "node-cron": "^3.0.2"
   },
   "devDependencies": {
     "prisma": "^5.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
     "@types/node": "^20.4.2",
-    "@types/react": "^18.2.21"
-  }
-  ,
-  "bin": {
-    "offer-updater": "src/workers/offerUpdater.ts"
+    "@types/react": "^18.2.21",
+    "ts-node-dev": "^2.0.0"
   }
 }
