@@ -1,0 +1,395 @@
+Você é um engenheiro full-stack sênior. Quero que você crie um projeto de site inspirado no conceito do GG.deals, mas sem copiar identidade visual, marca, textos ou layout exato. O site será focado em comparação de preços de jogos digitais com ativação Global, América Latina e Brasil.
+
+Nome provisório do projeto:
+GameDeals BR
+
+Objetivo do produto:
+Criar uma plataforma onde o usuário possa pesquisar jogos digitais e comparar preços entre lojas, com foco em:
+- Chaves com ativação Global
+- Chaves com ativação América Latina / LATAM
+- Chaves com ativação Brasil
+- Preços em BRL, USD e outras moedas relevantes
+- Histórico de menor preço
+- Alertas de preço
+- Lista de desejos
+- Comparação entre lojas oficiais e marketplaces, deixando claro o tipo da loja
+- Destaque para lojas confiáveis, região de ativação e possíveis restrições
+
+Importante:
+Não quero copiar o GG.deals diretamente. Quero um produto com proposta parecida, mas com identidade própria, focada no público brasileiro e latino-americano.
+
+Stack sugerida:
+- Frontend: Next.js com TypeScript
+- Estilização: Tailwind CSS
+- Backend/API: Next.js API Routes ou NestJS, se o projeto já usar backend separado
+- Banco de dados: PostgreSQL
+- ORM: Prisma
+- Cache: Redis
+- Jobs/agendamento: BullMQ, node-cron ou equivalente
+- Autenticação: NextAuth/Auth.js
+- Deploy: Vercel para frontend e backend simples; Railway/Supabase/Render para banco e workers
+
+Funcionalidades principais:
+
+1. Página inicial
+Criar uma landing page moderna, com foco em conversão:
+- Hero section com chamada forte:
+  "Compare preços de jogos digitais com ativação Global, LATAM e Brasil"
+- Campo de busca central para pesquisar jogos
+- Cards de ofertas em destaque
+- Seção "Menores preços de hoje"
+- Seção "Jogos com ativação no Brasil"
+- Seção "Histórico de menor preço"
+- Seção explicando diferença entre:
+  - Ativação Global
+  - Ativação LATAM
+  - Ativação Brasil
+  - VPN/restrição regional, quando aplicável
+- CTA para o usuário criar conta e salvar alertas de preço
+
+2. Busca de jogos
+Criar uma página de busca com:
+- Campo de pesquisa por nome do jogo
+- Autocomplete
+- Filtros:
+  - Região de ativação: Global, Brasil, LATAM
+  - Plataforma: Steam, Epic, GOG, Xbox, PlayStation, Nintendo, Outros
+  - Tipo de loja: Oficial, Marketplace, Keyshop
+  - Preço mínimo e máximo
+  - Moeda
+  - Desconto mínimo
+  - Menor preço histórico
+  - Apenas jogos ativáveis no Brasil
+  - Apenas lojas confiáveis
+- Ordenação por:
+  - Menor preço
+  - Maior desconto
+  - Mais recentes
+  - Melhor avaliação
+  - Menor preço histórico
+  - Popularidade
+
+3. Página de jogo
+Cada jogo deve ter uma página individual contendo:
+- Nome do jogo
+- Capa
+- Plataformas
+- Desenvolvedora/publicadora
+- Data de lançamento
+- Gêneros
+- Preço atual mais barato
+- Menor preço histórico
+- Lista de lojas com preço
+- Região de ativação de cada oferta
+- Tipo de chave
+- DRM: Steam, Epic, GOG, Ubisoft, EA App etc.
+- Botão "Ir para a loja"
+- Aviso de segurança:
+  "Verifique a região de ativação antes da compra."
+- Gráfico de histórico de preço
+- Botão para criar alerta de preço
+- Botão para adicionar à wishlist
+
+4. Sistema de ofertas
+Criar estrutura para armazenar ofertas com:
+- gameId
+- storeId
+- title
+- price
+- currency
+- convertedPriceBRL
+- discountPercent
+- originalPrice
+- activationRegion: GLOBAL, BRASIL, LATAM, USA, EUROPE, UNKNOWN
+- drm
+- url
+- affiliateUrl, se existir
+- isOfficialStore
+- isMarketplace
+- isKeyshop
+- stockStatus
+- lastCheckedAt
+- sourceApi
+- confidenceScore
+
+5. Modelo de banco de dados
+Criar schema Prisma com as tabelas principais:
+
+User:
+- id
+- name
+- email
+- passwordHash ou authProvider
+- createdAt
+
+Game:
+- id
+- externalId
+- slug
+- title
+- description
+- coverImage
+- releaseDate
+- publisher
+- developer
+- platforms
+- genres
+- createdAt
+- updatedAt
+
+Store:
+- id
+- name
+- slug
+- logo
+- websiteUrl
+- type: OFFICIAL, MARKETPLACE, KEYSHOP
+- trustScore
+- supportsAffiliate
+- createdAt
+
+Offer:
+- id
+- gameId
+- storeId
+- price
+- originalPrice
+- currency
+- convertedPriceBRL
+- discountPercent
+- activationRegion
+- drm
+- offerUrl
+- affiliateUrl
+- sourceApi
+- lastCheckedAt
+- isActive
+- createdAt
+- updatedAt
+
+PriceHistory:
+- id
+- gameId
+- storeId
+- price
+- currency
+- convertedPriceBRL
+- activationRegion
+- checkedAt
+
+Wishlist:
+- id
+- userId
+- gameId
+- createdAt
+
+PriceAlert:
+- id
+- userId
+- gameId
+- targetPriceBRL
+- activationRegion
+- isActive
+- createdAt
+
+6. APIs externas de preço
+Implementar camada de integração com múltiplas fontes:
+
+Fonte 1: IsThereAnyDeal API
+Usar para:
+- Buscar jogos
+- Obter overview de preços
+- Obter menor preço atual
+- Obter histórico de menor preço
+- Obter lojas disponíveis
+- Validar regiões quando disponível
+
+Fonte 2: CheapShark API
+Usar como fonte complementar para:
+- Deals de jogos digitais
+- Busca por título
+- Comparação de preços em lojas suportadas
+
+Fonte 3: Steam Store API / appdetails
+Usar para:
+- Buscar preço de jogos Steam por país
+- Usar parâmetro de país, por exemplo cc=BR
+- Obter preço em moeda local quando disponível
+- Nunca consultar em tempo real a cada acesso do usuário; usar cache
+
+Importante:
+Não depender exclusivamente de scraping. Priorizar APIs oficiais ou públicas. Caso algum scraping seja necessário no futuro, criar um módulo separado respeitando robots.txt, termos de uso, rate limit e cache.
+
+7. Atualização de preço
+Criar uma lógica de atualização quase em tempo real usando cache e jobs:
+
+- Não consultar APIs externas a cada carregamento de página.
+- Criar job recorrente para atualizar preços:
+  - Ofertas populares: a cada 15 ou 30 minutos
+  - Jogos normais: a cada 3 a 6 horas
+  - Jogos pouco acessados: a cada 12 ou 24 horas
+- Quando o usuário abrir uma página de jogo:
+  - Mostrar dados do cache imediatamente
+  - Se lastCheckedAt for antigo, disparar atualização assíncrona
+  - Exibir "Atualizado há X minutos"
+- Salvar todo preço consultado em PriceHistory
+- Usar Redis para cache de:
+  - Busca
+  - Página do jogo
+  - Lista de ofertas
+  - Conversão de moedas
+
+8. Conversão de moeda
+Criar serviço de conversão para BRL:
+- Salvar preço original e moeda original
+- Converter para BRL usando uma API de câmbio
+- Atualizar taxa de câmbio periodicamente
+- Mostrar ao usuário:
+  - Preço original
+  - Preço aproximado em BRL
+  - Aviso: "Valor convertido pode variar conforme câmbio, IOF e método de pagamento."
+
+9. Classificação de região
+Criar função para normalizar região de ativação:
+
+Entrada possível:
+- "Global"
+- "Worldwide"
+- "LATAM"
+- "Latin America"
+- "Brazil"
+- "Brasil"
+- "South America"
+- "RoW"
+- "Region locked"
+- texto desconhecido
+
+Saída normalizada:
+- GLOBAL
+- BRASIL
+- LATAM
+- SOUTH_AMERICA
+- REGION_LOCKED
+- UNKNOWN
+
+A interface deve destacar visualmente:
+- GLOBAL: seguro para ativação global, mas ainda pedir verificação
+- BRASIL: ativável no Brasil
+- LATAM: ativável na América Latina, verificar Brasil
+- UNKNOWN: exigir cautela
+- REGION_LOCKED: mostrar alerta
+
+10. Interface visual
+Criar um design moderno, escuro, gamer e profissional:
+- Fundo escuro
+- Cards com bordas suaves
+- Destaques em verde, azul ou roxo
+- Badges para região:
+  - Global
+  - Brasil
+  - LATAM
+  - Restrição regional
+- Badges para tipo de loja:
+  - Loja oficial
+  - Marketplace
+  - Keyshop
+- Botões claros:
+  - Ver oferta
+  - Criar alerta
+  - Adicionar à wishlist
+- Layout responsivo para desktop e mobile
+
+11. Segurança e transparência
+Criar avisos claros:
+- "Sempre verifique a região de ativação antes de concluir a compra."
+- "Preços podem mudar sem aviso prévio."
+- "Algumas lojas podem ter cobrança em moeda estrangeira."
+- "O preço em BRL é estimado quando a loja cobra em outra moeda."
+
+12. Monetização futura
+Preparar o sistema para:
+- Links de afiliado por loja
+- Painel administrativo para cadastrar lojas
+- Painel para configurar tracking de afiliado
+- Ofertas patrocinadas, sempre identificadas
+- Newsletter de promoções
+- Alertas premium
+- Comparador avançado para usuários logados
+
+13. Painel administrativo
+Criar admin com:
+- Lista de jogos
+- Lista de lojas
+- Lista de ofertas
+- Logs de atualização de preço
+- Status das APIs
+- Controle manual de região de ativação
+- Trust score da loja
+- Campo para configurar links afiliados
+
+14. Componentes principais
+Criar os seguintes componentes:
+- SearchBar
+- GameCard
+- DealCard
+- RegionBadge
+- StoreBadge
+- PriceHistoryChart
+- PriceAlertModal
+- WishlistButton
+- StoreComparisonTable
+- GameFiltersSidebar
+- CurrencyDisplay
+- LastUpdatedLabel
+
+15. Entregáveis esperados
+Quero que você:
+- Analise a estrutura atual do projeto, se já existir
+- Crie ou ajuste a arquitetura
+- Implemente as páginas principais
+- Crie os modelos Prisma
+- Crie os serviços de integração de preços
+- Crie sistema de cache
+- Crie jobs de atualização
+- Crie seed inicial com algumas lojas e jogos de exemplo
+- Crie layout moderno e responsivo
+- Documente no README como configurar as APIs
+
+16. Regras técnicas
+- Usar TypeScript em tudo
+- Separar camada de API externa em services
+- Não espalhar chamadas externas dentro de componentes
+- Criar tratamento de erro para API fora do ar
+- Criar fallback para preço indisponível
+- Criar logs de atualização
+- Criar rate limit interno para não abusar das APIs
+- Criar validação com Zod quando aplicável
+- Usar variáveis de ambiente:
+  - ITAD_API_KEY
+  - CHEAPSHARK_BASE_URL
+  - STEAM_STORE_BASE_URL
+  - DATABASE_URL
+  - REDIS_URL
+  - EXCHANGE_RATE_API_KEY
+
+17. Resultado desejado
+Ao final, quero ter um MVP funcional onde o usuário consiga:
+- Pesquisar um jogo
+- Ver ofertas disponíveis
+- Filtrar por Global, LATAM e Brasil
+- Comparar preços
+- Ver menor preço atual
+- Ver histórico de preço
+- Criar alerta de preço
+- Adicionar jogos à wishlist
+- Clicar para comprar na loja
+
+Comece implementando primeiro:
+1. Banco de dados
+2. Página inicial
+3. Busca de jogos
+4. Página individual do jogo
+5. Integração com IsThereAnyDeal
+6. Cache de preços
+7. Filtro de região de ativação
+8. Histórico de preço

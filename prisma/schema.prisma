@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String?
+  createdAt DateTime @default(now())
+  wishlists Wishlist[]
+  alerts    PriceAlert[]
+}
+
+model Game {
+  id          String   @id @default(cuid())
+  externalId  String?  @unique
+  slug        String   @unique
+  title       String
+  description String?
+  coverImage  String?
+  releaseDate DateTime?
+  publisher   String?
+  developer   String?
+  platforms   String[]
+  genres      String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  offers      Offer[]
+  history     PriceHistory[]
+  wishlists   Wishlist[]
+  alerts      PriceAlert[]
+}
+
+model Store {
+  id               String  @id @default(cuid())
+  name             String
+  slug             String  @unique
+  logo             String?
+  websiteUrl       String?
+  type             StoreType
+  trustScore       Int?
+  supportsAffiliate Boolean @default(false)
+  createdAt        DateTime @default(now())
+  offers           Offer[]
+}
+
+enum StoreType {
+  OFFICIAL
+  MARKETPLACE
+  KEYSHOP
+}
+
+model Offer {
+  id               String   @id @default(cuid())
+  game             Game     @relation(fields: [gameId], references: [id])
+  gameId           String
+  store            Store    @relation(fields: [storeId], references: [id])
+  storeId          String
+  title            String?
+  price            Float
+  originalPrice    Float?
+  currency         String
+  convertedPriceBRL Float?
+  discountPercent  Int?
+  activationRegion ActivationRegion
+  drm              String?
+  offerUrl         String
+  affiliateUrl     String?
+  sourceApi        String?
+  lastCheckedAt    DateTime?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  history          PriceHistory[]
+}
+
+model PriceHistory {
+  id               String   @id @default(cuid())
+  game             Game     @relation(fields: [gameId], references: [id])
+  gameId           String
+  store            Store    @relation(fields: [storeId], references: [id])
+  storeId          String
+  price            Float
+  currency         String
+  convertedPriceBRL Float?
+  activationRegion ActivationRegion
+  checkedAt        DateTime @default(now())
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  game      Game     @relation(fields: [gameId], references: [id])
+  gameId    String
+  createdAt DateTime @default(now())
+}
+
+model PriceAlert {
+  id             String   @id @default(cuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+  game           Game     @relation(fields: [gameId], references: [id])
+  gameId         String
+  targetPriceBRL Float
+  activationRegion ActivationRegion
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+enum ActivationRegion {
+  GLOBAL
+  BRASIL
+  LATAM
+  SOUTH_AMERICA
+  REGION_LOCKED
+  UNKNOWN
+}
