@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.4.2",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^18.2.21",
     "prisma": "^5.1.0",
     "ts-node": "^10.9.1",
