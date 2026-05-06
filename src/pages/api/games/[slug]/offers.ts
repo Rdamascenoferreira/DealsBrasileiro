@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!game) return res.status(404).json({ error: 'game not found' })
 
     const updatedOffers = await Promise.all(
-      game.offers.map(async (offer) => {
+      game.offers.map(async (offer: any) => {
         let converted = offer.convertedPriceBRL ?? null
         try {
           if (converted == null) {
