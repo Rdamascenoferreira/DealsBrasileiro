@@ -32,4 +32,8 @@
     "@types/node": "^20.4.2",
     "@types/react": "^18.2.21"
   }
+  ,
+  "bin": {
+    "offer-updater": "src/workers/offerUpdater.ts"
+  }
 }
